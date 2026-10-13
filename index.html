@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ALPHA DEV</title>
+  <style>
+    :root{
+      --primary:#00f0ff;
+      --yellow:#38bdf8;
+      --secondary:#0284c7;
+      --aqua:#0ea5e9;
+      --accent:#38bdf8;
+      --text:#1e293b;
+      --text-soft:#475569;
+      --white:#fff;
+      --glass:rgba(255,255,255,0.65);
+      --glass-strong:rgba(255,255,255,0.85);
+      --shadow:0 10px 30px rgba(0,140,255,.10);
+      --shadow-lg:0 20px 50px rgba(0,140,255,.18);
+      --border:rgba(0,140,255,.25);
+      --bg1:#f0f9ff;
+      --bg2:#e0f2fe;
+      --bg3:#bae6fd;
+      --bg4:#7dd3fc;
+      --card:rgba(255,255,255,0.75);
+      --ok:#22c55e;
+      --danger:#ef4444;
+      --dark:#0f172a;
+      --dark2:#1e293b;
+      --muted:#64748b;
+    }
+
+    body.dark{
+      --text:#f8fafc;
+      --text-soft:#94a3b8;
+      --white:#090d16;
+      --glass:rgba(15,23,42,0.65);
+      --glass-strong:rgba(15,23,42,0.85);
+      --border:rgba(0,240,255,.25);
+      --card:rgba(15,23,42,0.75);
+      --shadow:0 12px 30px rgba(0,0,0,.50);
+      --shadow-lg:0 22px 55px rgba(0,0,0,.60);
+      --bg1:#030712;
+      --bg2:#0f172a;
+      --bg3:#1e293b;
+      --bg4:#0284c7;
+      background:#030712;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family: Inter, Arial, sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background: linear-gradient(-45deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4));
+      background-size: 400% 400%;
+      animation: gradientFlow 18s ease infinite;
+      overflow-x:hidden;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    @keyframes gradientFlow{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
+    canvas#particles{
+      position:fixed;
+      inset:0;
+      z-index:-3;
+      opacity:.65;
+      pointer-events:none;
+    }
+
+    .bg-blur{
+      position:fixed;
+      inset:auto;
+      width:300px;height:300px;
+      border-radius:50%;
+      filter:blur(60px);
+      z-index:-2;
+      opacity:.4;
+      animation: floatBlob 14s ease-in-out infinite;
+      will-change: transform;
+    }
+    .blob1{top:8%;left:5%;background:var(--primary)}
+    .blob2{bottom:10%;right:6%;background:var(--secondary);animation-delay:2s}
+    .blob3{top:40%;right:30%;background:var(--aqua);animation-delay:4s}
+
+    @keyframes floatBlob{
+      0%,100%{transform:translateY(0) translateX(0) scale(1)}
+      50%{transform:translateY(-20px) translateX(20px) scale(1.08)}
+    }
+
+    .hidden{display:none !important}
+    .app{
+      display:flex;
+      min-height:100vh;
+      position:relative;
+    }
+
+    /* Sidebar Smooth Slide & Backdrop Fix */
+    .sidebar{
+      width:260px;
+      background:var(--glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-right:1px solid var(--border);
+      position:fixed;
+      top:0;left:0;bottom:0;
+      padding:20px 16px;
+      z-index:60;
+      box-shadow:var(--shadow);
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+    .sidebar.open{
+      transform: translateX(0);
+    }
+
+    /* Sidebar Overlay for Mobile */
+    .sidebar-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index:55;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 0.3s ease;
+    }
+    .sidebar-overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .brand{
+      display:flex;align-items:center;gap:12px;
+      margin-bottom:16px;
+      padding:10px;
+      border-radius:20px;
+      background:var(--glass-strong);
+      position: relative;
+    }
+    .brand .logo{
+      width:42px;height:42px;border-radius:14px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      color:#fff;font-size:22px;
+      box-shadow:0 0 20px rgba(0,240,255,.35);
+    }
+    .brand h1{font-size:16px}
+    .brand p{font-size:11px;color:var(--text-soft)}
+
+    /* Close button inside sidebar */
+    .sidebar-close{
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--border);
+      color: var(--danger);
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+    .sidebar-close:hover{
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .sidebar-toggle{
+      border:none;
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      color:white;
+      width:40px;height:40px;border-radius:12px;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      display:grid;
+      place-items:center;
+      font-size:18px;
+      flex-shrink:0;
+      transition: transform 0.2s ease;
+    }
+    .sidebar-toggle:active{ transform: scale(0.95); }
+
+    .side-links{
+      display:flex;flex-direction:column;gap:6px;
+      margin-top:8px;
+      max-height: calc(100vh - 190px);
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .side-links::-webkit-scrollbar{ width: 4px; }
+    .side-links::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 4px; }
+
+    .side-link{
+      border:none;
+      background:transparent;
+      color:var(--text);
+      text-align:left;
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:13px;
+      transition:.2s ease;
+      display:flex;align-items:center;gap:10px;
+      font-weight: 600;
+    }
+    .side-link:hover,.side-link.active{
+      background:linear-gradient(90deg, rgba(0,240,255,.18), rgba(2,132,199,.18));
+      transform:translateX(4px);
+      box-shadow:var(--shadow);
+    }
+
+    .sidebar-bottom{
+      margin-top:auto;
+      display:flex;flex-direction:column;gap:6px;
+      position:absolute;left:16px;right:16px;bottom:16px;
+      background: var(--glass);
+      padding: 8px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .main{
+      margin-left:0;
+      width:100%;
+      min-height:100vh;
+      transition: margin-left 0.35s ease;
+    }
+
+    .topbar{
+      position:sticky;top:0;z-index:30;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;
+      padding:12px 20px;
+      background:rgba(255,255,255,.25);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom:1px solid var(--border);
+    }
+
+    body.dark .topbar{background:rgba(15,23,42,.65)}
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .search-wrap{
+      display:flex;align-items:center;gap:8px;
+      background:var(--glass);
+      padding:8px 14px;
+      border-radius:20px;
+      width:100%;
+      border:1px solid var(--border);
+    }
+    .search-wrap input{
+      flex:1;border:none;outline:none;background:transparent;color:var(--text);
+      font-size:13px;
+      min-width: 0;
+    }
+
+    .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap; flex-shrink:0;}
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      border-radius:24px;
+      padding:9px 16px;
+      font-weight:700;
+      color:#fff;
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      box-shadow:0 6px 20px rgba(0,240,255,.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      font-size:13px;
+    }
+    .btn:hover{transform:translateY(-2px) scale(1.02); box-shadow:0 0 22px rgba(0,240,255,.45)}
+    .btn:active{transform:translateY(0) scale(0.98)}
+    .btn.secondary{
+      background:linear-gradient(135deg,var(--secondary),var(--aqua));
+      color:#fff;
+    }
+    .btn.ghost{
+      background:var(--glass);
+      color:var(--text);
+      border:1px solid var(--border);
+      box-shadow:none;
+    }
+    .btn.danger{
+      background:linear-gradient(135deg,#f43f5e,#dc2626);
+    }
+    .btn.small{padding:6px 12px;border-radius:14px;font-size:12px}
+
+    .container{
+      padding:20px 20px 60px;
+      max-width:1400px;
+      margin:0 auto;
+    }
+
+    .page{display:none;animation:fadePage .35s cubic-bezier(0.4, 0, 0.2, 1)}
+    .page.active{display:block}
+    @keyframes fadePage{
+      from{opacity:0;transform:translateY(8px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .hero{
+      min-height:70vh;
+      border-radius:28px;
+      background:
+        linear-gradient(rgba(15,23,42,.35), rgba(15,23,42,.25)),
+        url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80') center/cover;
+      padding:32px;
+      box-shadow:var(--shadow-lg);
+      position:relative;
+      overflow:hidden;
+      color:#fff;
+      display:flex;align-items:center;
+      border:1px solid var(--border);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;left:0;right:0;bottom:0;height:80px;
+      background:
+      radial-gradient(circle at 20% 30%, rgba(0,240,255,.3), transparent 25%),
+      linear-gradient(to top, rgba(255,255,255,.12), transparent);
+    }
+
+    .sun{
+      position:absolute;top:40px;right:50px;
+      width:100px;height:100px;border-radius:50%;
+      background:radial-gradient(circle, #fff, var(--primary) 55%, var(--secondary) 75%);
+      box-shadow:0 0 50px rgba(0,240,255,.7);
+      animation: floatY 4s ease-in-out infinite;
+    }
+
+    .cloud,.palm{
+      position:absolute;opacity:.85;animation: floatY 5s ease-in-out infinite;
+      font-size:38px;
+    }
+    .cloud.c1{top:60px;left:30px}
+    .cloud.c2{top:100px;right:180px;animation-delay:1s}
+    .palm{bottom:40px;right:30px;font-size:72px;animation-delay:1.5s}
+
+    @keyframes floatY{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+    }
+
+    .hero-content{
+      max-width:700px;
+      position:relative;z-index:2;
+    }
+
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:8px 12px;border-radius:999px;
+      background:rgba(255,255,255,.2);
+      backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,.35);
+      margin-bottom:12px;
+      font-weight:700;
+      font-size:12px;
+    }
+
+    .hero h2{
+      font-size:clamp(2rem,4vw,4rem);
+      line-height:1.08;
+      margin-bottom:12px;
+      text-shadow:0 4px 16px rgba(0,0,0,.3);
+    }
+
+    .hero p{
+      font-size:0.95rem;
+      line-height:1.6;
+      color:#f8fafc;
+      max-width:600px;
+      margin-bottom:18px;
+    }
+
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .avatar{
+      width:90px;height:90px;border-radius:24px;
+      object-fit:cover;
+      border:3px solid rgba(255,255,255,.4);
+      box-shadow:var(--shadow-lg);
+      margin-bottom:12px;
+    }
+
+    .section{
+      margin-top:24px;
+    }
+
+    .section-title{
+      display:flex;align-items:end;justify-content:space-between;gap:12px;
+      margin-bottom:14px;flex-wrap:wrap;
+    }
+    .section-title h3{
+      font-size:1.5rem;
+    }
+    .section-title p{color:var(--text-soft); font-size:13px;}
+
+    .grid{
+      display:grid;
+      gap:14px;
+    }
+    .grid.cards-3{grid-template-columns:repeat(3,1fr)}
+    .grid.cards-4{grid-template-columns:repeat(4,1fr)}
+    .grid.cards-2{grid-template-columns:repeat(2,1fr)}
+
+    .card{
+      background:var(--card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      position:relative;
+      overflow:hidden;
+      will-change: transform;
+    }
+    .card:hover{
+      transform:translateY(-3px) scale(1.002);
+      box-shadow:0 0 25px rgba(0,240,255,.25), var(--shadow-lg);
+      border-color: var(--primary);
+    }
+
+    .project-img{
+      width:100%;
+      height:160px;
+      object-fit:cover;
+      border-radius:14px;
+      margin-bottom:10px;
+    }
+
+    .project-badge{
+      position:absolute;
+      top:12px;right:12px;
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      color:#fff;
+      font-weight:800;
+      font-size:11px;
+      padding:6px 8px;
+      border-radius:999px;
+      box-shadow:0 0 12px rgba(0,240,255,.4);
+    }
+
+    .glow{
+      animation: glowPulse 2.8s ease-in-out infinite;
+    }
+    @keyframes glowPulse{
+      0%,100%{box-shadow:0 0 0 rgba(0,240,255,.2), var(--shadow)}
+      50%{box-shadow:0 0 25px rgba(0,240,255,.35), 0 0 45px rgba(2,132,199,.2)}
+    }
+
+    .meta{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+    .pill{
+      background:rgba(0,240,255,.12);
+      border:1px solid var(--border);
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:11px;
+      color:var(--secondary);
+      font-weight:700;
+    }
+
+    .icon-circle{
+      width:46px;height:46px;border-radius:14px;
+      display:grid;place-items:center;
+      font-size:20px;
+      background:linear-gradient(135deg,rgba(0,240,255,.2),rgba(2,132,199,.25));
+      margin-bottom:10px;
+    }
+
+    .stat{
+      text-align:center;
+      padding:16px 14px;
+    }
+    .stat h4{font-size:1.7rem;margin:6px 0}
+    .stat p{color:var(--text-soft); font-size:13px;}
+
+    .list{
+      display:flex;flex-direction:column;gap:10px;
+    }
+
+    .row{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .progress{
+      width:100%;height:10px;border-radius:999px;
+      background:rgba(0,140,255,.15);
+      overflow:hidden;margin-top:6px;
+    }
+    .progress > span{
+      display:block;height:100%;
+      background:linear-gradient(90deg,var(--primary),var(--secondary),var(--aqua));
+      border-radius:999px;
+    }
+
+    .tech-stack{
+      display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
+    }
+    .tech{
+      padding:6px 10px;border-radius:12px;background:var(--glass);
+      border:1px solid var(--border);font-weight:700;font-size:12px;
+    }
+
+    form{display:grid;gap:10px}
+    .input, textarea, select{
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius:14px;
+      background:var(--glass);
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:11px 14px;
+      font-size:13px;
+      resize:vertical;
+    }
+
+    textarea{min-height:90px}
+    .error{font-size:12px;color:var(--danger)}
+    .success{font-size:12px;color:var(--ok)}
+
+    .auth-shell{
+      min-height:100vh;
+      display:grid;place-items:center;
+      padding:16px;
+    }
+    .auth-card{
+      width:min(900px,100%);
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      background:var(--glass);
+      border:1px solid var(--border);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:var(--shadow-lg);
+    }
+    .auth-left{
+      padding:30px;
+      background:
+        linear-gradient(rgba(15,23,42,.5), rgba(15,23,42,.3)),
+        url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80') center/cover;
+      color:white;
+      min-height:500px;
+      display:flex;flex-direction:column;justify-content:end;
+      position:relative;
+    }
+    .auth-left h2{font-size:2.2rem;margin-bottom:8px}
+    .auth-left p{line-height:1.6;color:#f8fafc;font-size:13px;}
+    .auth-right{padding:28px}
+    .tabs{display:flex;gap:8px;margin-bottom:16px}
+    .tab{
+      flex:1;padding:10px;border:none;border-radius:14px;cursor:pointer;
+      background:var(--glass);color:var(--text);font-weight:700;border:1px solid var(--border);font-size:13px;
+    }
+    .tab.active{
+      background:linear-gradient(135deg,var(--primary),var(--secondary));color:#0f172a
+    }
+
+    .table-wrap{overflow-x:auto}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:transparent;
+    }
+    th,td{
+      padding:10px;
+      text-align:left;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      font-size:13px;
+    }
+    th{color:var(--text-soft);font-size:12px}
+
+    .admin-grid{
+      display:grid;grid-template-columns:2fr 1fr;gap:14px;
+    }
+
+    .admin-tabs{
+      display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px
+    }
+
+    .fade-in{
+      opacity:0;transform:translateY(12px);
+      transition:opacity 0.5s ease, transform 0.5s ease;
+      will-change: opacity, transform;
+    }
+    .fade-in.visible{
+      opacity:1;transform:translateY(0);
+    }
+
+    .wave{
+      position:relative;
+      height:70px;
+      overflow:hidden;
+      margin-top:14px;
+    }
+    .wave::before,
+    .wave::after{
+      content:"";
+      position:absolute;
+      left:-10%;width:120%;height:100px;
+      background:rgba(0,240,255,.18);
+      border-radius:45%;
+      animation:waveMove 8s linear infinite;
+    }
+    .wave::before{bottom:-50px}
+    .wave::after{bottom:-60px;opacity:.55;animation-duration:12s}
+    @keyframes waveMove{
+      from{transform:translateX(0)}
+      to{transform:translateX(-10%)}
+    }
+
+    .notify{
+      position:fixed;right:16px;top:16px;z-index:100;
+      min-width:240px;max-width:340px;
+      background:var(--glass-strong);
+      border:1px solid var(--border);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      padding:12px 14px;
+      border-radius:16px;
+      box-shadow:var(--shadow-lg);
+      transform:translateY(-14px);
+      opacity:0;pointer-events:none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      font-size:13px;
+    }
+    .notify.show{opacity:1;transform:translateY(0)}
+    .loader{
+      position:fixed;inset:0;z-index:200;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(0,240,255,.12), rgba(2,132,199,.15));
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .loader.hidden{display:none!important}
+    .spinner{
+      width:70px;height:70px;border-radius:50%;
+      border:6px solid rgba(0,240,255,.2);
+      border-top-color:var(--primary);
+      border-right-color:var(--secondary);
+      animation:spin 1s linear infinite;
+      box-shadow:0 0 25px rgba(0,240,255,.4);
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .small-muted{font-size:11px;color:var(--text-soft)}
+    .welcome-user{
+      font-weight:700;
+      padding:6px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--border);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .social-contact-grid{
+      display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-top:10px;
+    }
+    .social-card{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:14px;
+      background: var(--glass);
+      border:1px solid var(--border);
+      color:var(--text); text-decoration:none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      font-weight:700; font-size:13px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .social-card:hover{
+      transform:translateY(-2px);
+      box-shadow:var(--shadow-lg);
+      background: var(--glass-strong);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .social-card svg{ width:20px; height:20px; fill:currentColor; flex-shrink:0; }
+    .social-card.wa{ color:#25D366; }
+    .social-card.tg{ color:#0088cc; }
+    .social-card.fb{ color:#1877F2; }
+    .social-card.ig{ color:#E4405F; }
+    .social-card.tt{ color:#38bdf8; }
+
+    @media (min-width: 901px){
+      .sidebar{ transform: translateX(0); }
+      .main{ margin-left: 260px; width: calc(100% - 260px); }
+      .sidebar-overlay{ display: none !important; }
+      .sidebar-close{ display: none !important; }
+    }
+
+    @media (max-width:1100px){
+      .grid.cards-4{grid-template-columns:repeat(2,1fr)}
+      .grid.cards-3{grid-template-columns:repeat(2,1fr)}
+      .admin-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width:900px){
+      .auth-card{grid-template-columns:1fr}
+      .auth-left{min-height:240px}
+      .hero{padding:24px}
+    }
+
+    @media (max-width:680px){
+      .grid.cards-4,.grid.cards-3,.grid.cards-2{grid-template-columns:1fr}
+      .topbar{padding:10px 12px; gap:8px;}
+      .search-wrap{padding:6px 10px;}
+      .search-wrap input { font-size:12px; }
+      .container{padding:16px 12px 60px}
+      .hero h2{font-size:1.8rem}
+      .sun{width:70px;height:70px;right:15px;top:15px}
+      .cloud,.palm{display:none}
+      .social-contact-grid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+  <div class="bg-blur blob1"></div>
+  <div class="bg-blur blob2"></div>
+  <div class="bg-blur blob3"></div>
+
+  <div id="loader" class="loader">
+    <div class="spinner"></div>
+  </div>
+
+  <div id="notify" class="notify"></div>
+
+  <!-- AUTH -->
+  <section id="authView" class="auth-shell">
+    <div class="auth-card fade-in visible">
+      <div class="auth-left">
+        <div class="badge"> WELCOME TO ALPHA</div>
+        <h2>Future-ready cyber portfolio experience.</h2>
+        <p>
+          Login or register to explore a modern clean white and blue cyber portfolio app
+          with works, services, bots, feedback, contact system.
+        </p>
+        <div class="wave"></div>
+      </div>
+      <div class="auth-right">
+        <div class="tabs">
+          <button class="tab active" onclick="switchAuthTab('login')">Login</button>
+          <button class="tab" onclick="switchAuthTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="loginTab">
+          <h2 style="margin-bottom:6px; font-size: 1.5rem;">Welcome Back </h2>
+          <p class="small-muted" style="margin-bottom:12px;">Sign in with your account.</p>
+          <form id="loginForm">
+            <input class="input" type="text" id="loginUser" placeholder="Username or Email" />
+            <input class="input" type="password" id="loginPass" placeholder="Password" />
+            <label class="small-muted"><input type="checkbox" id="rememberMe" /> Remember me</label>
+            <div id="loginMsg"></div>
+            <button class="btn" type="submit">Login</button>
+          </form>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="registerTab" class="hidden">
+          <h2 style="margin-bottom:6px; font-size: 1.5rem;">Create Account </h2>
+          <p class="small-muted" style="margin-bottom:12px;">Join and leave feedback, contact messages, and explore projects.</p>
+          <form id="registerForm">
+            <input class="input" type="text" id="regUsername" placeholder="Username" />
+            <input class="input" type="email" id="regEmail" placeholder="Email" />
+            <input class="input" type="password" id="regPassword" placeholder="Password" />
+            <div id="registerMsg"></div>
+            <button class="btn secondary" type="submit">Register</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <div id="appView" class="app hidden">
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="sidebar">
+      <div class="brand">
+        <div class="logo">🤖</div>
+        <div>
+          <h1>WELCOME </h1>
+          <p>TO MEET ALPHA HEAR</p>
+        </div>
+        <!-- Close button inside sidebar -->
+        <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+      </div>
+
+      <div class="side-links">
+        <button class="side-link active" data-page="home">🏠 Home</button>
+        <button class="side-link" data-page="works">🧩 Works</button>
+        <button class="side-link" data-page="services">🛠️ Services</button>
+        <button class="side-link" data-page="bots">🤖 Bots</button>
+        <button class="side-link" data-page="featured">✨ Featured</button>
+        <button class="side-link" data-page="about">🌐 About</button>
+        <button class="side-link" data-page="contact">📩 Contact</button>
+        <button class="side-link" data-page="feedback">💬 Feedback</button>
+        <button id="adminNavBtn" class="side-link hidden" data-page="admin">🛡️ Admin Panel</button>
+      </div>
+
+      <div class="sidebar-bottom">
+        <button class="btn ghost small" onclick="toggleTheme()">🌓 Dark / Light</button>
+        <button class="btn danger small" onclick="logout()">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+          <div class="search-wrap">
+            <span>🔎</span>
+            <input id="globalSearch" type="text" placeholder="Search..." />
+          </div>
+        </div>
+        <div class="top-actions">
+          <div id="welcomeUser" class="welcome-user">Hi, Guest</div>
+        </div>
+      </div>
+
+      <div class="container">
+        <!-- HOME -->
+        <section id="page-home" class="page active">
+          <div class="hero fade-in visible">
+            <div class="sun"></div>
+            <div class="cloud c2">☁️</div>
+
+            <div class="palm"></div>
+            <div class="hero-content">
+              <img class="avatar" src="https://i.imgur.com/vHHdrrA.png" alt="avatar" onerror="this.src='https://via.placeholder.com/110/0284c7/ffffff?text=ALPHA'" />
+              
+              <h2>HELLO I'M SAJITH AKASH.</h2>
+              <p>
+                I create modern web apps, UI/UX systems, bots, and automation tools with a smooth cyber blue vibe.
+                Explore dynamic featured projects, latest works, services, bots, and more.
+              </p>
+              <div class="hero-actions">
+                <button class="btn" onclick="goPage('works')">Explore Works</button>
+                <button class="btn secondary" onclick="goPage('contact')">Contact Me</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section fade-in">
+            <div class="section-title">
+              <div>
+                <h3>Featured Projects</h3>
+                <p>Highlighted projects loaded dynamically</p>
+              </div>
+            </div>
+            <div id="homeFeatured" class="grid cards-3"></div>
+          </div>
+
+          <div class="section fade-in">
+            <div class="section-title">
+              <div>
+                <h3>Latest Works Preview</h3>
+                <p>Recent creations from portfolio collection</p>
+              </div>
+            </div>
+            <div id="latestWorks" class="grid cards-4"></div>
+          </div>
+        </section>
+
+        <!-- WORKS -->
+        <section id="page-works" class="page">
+          <div class="section-title">
+            <div>
+              <h3>Works</h3>
+              <p>Creative projects in a responsive grid layout</p>
+            </div>
+          </div>
+          <div id="worksGrid" class="grid cards-4"></div>
+        </section>
+
+        <!-- SERVICES -->
+        <section id="page-services" class="page">
+          <div class="section-title">
+            <div>
+              <h3>Services</h3>
+              <p>What I can build for you</p>
+            </div>
+          </div>
+          <div id="servicesGrid" class="grid cards-3"></div>
+        </section>
+
+        <!-- BOTS -->
+        <section id="page-bots" class="page">
+          <div class="section-title">
+            <div>
+              <h3>Bots</h3>
+              <p>Smart automation and conversational systems</p>
+            </div>
+          </div>
+          <div id="botsGrid" class="grid cards-2"></div>
+        </section>
+
+        <!-- FEATURED -->
+        <section id="page-featured" class="page">
+          <div class="section-title">
+            <div>
+              <h3>Featured Top Projects</h3>
+              <p>6 highlighted projects with glow animation</p>
+            </div>
+          </div>
+          <div id="featuredGrid" class="grid cards-3"></div>
+        </section>
+
+        <!-- ABOUT -->
+        <section id="page-about" class="page">
+          <div class="grid cards-2">
+            <div class="card fade-in">
+              <div class="section-title">
+                <div>
+                  <h3>About Me</h3>
+                  <p>Personal story and experience</p>
+                </div>
+              </div>
+              <p style="line-height:1.6;color:var(--text-soft); font-size: 13px;">
+                I’m a passionate creator focused on crafting stunning interfaces, scalable web systems,
+                bots, and useful automations. My style mixes futuristic product thinking with clean,
+                smooth cyber-inspired visuals that feel energetic and modern.
+              </p>
+              <div class="list" style="margin-top:12px;">
+                <div class="card" style="padding:10px;">
+                  <h4 style="font-size: 14px;">Experience</h4>
+                  <p class="small-muted">Advanced portfolio design, frontend engineering, automation systems, bot integrations.</p>
+                </div>
+                <div class="card" style="padding:10px;">
+                  <h4 style="font-size: 14px;">Education</h4>
+                  <p class="small-muted">Self-driven software learning, design systems practice, web architecture exploration.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card fade-in">
+              <div class="section-title">
+                <div>
+                  <h3>Skills</h3>
+                  <p>Progress overview</p>
+                </div>
+              </div>
+              <div class="list">
+                <div>
+                  <div class="row"><strong style="font-size: 13px;">HTML / CSS / JS</strong><span style="font-size: 12px;">95%</span></div>
+                  <div class="progress"><span style="width:95%"></span></div>
+                </div>
+                <div>
+                  <div class="row"><strong style="font-size: 13px;">UI / UX Design</strong><span style="font-size: 12px;">90%</span></div>
+                  <div class="progress"><span style="width:90%"></span></div>
+                </div>
+                <div>
+                  <div class="row"><strong style="font-size: 13px;">Bot Development</strong><span style="font-size: 12px;">88%</span></div>
+                  <div class="progress"><span style="width:88%"></span></div>
+                </div>
+                <div>
+                  <div class="row"><strong style="font-size: 13px;">Automation Systems</strong><span style="font-size: 12px;">86%</span></div>
+                  <div class="progress"><span style="width:86%"></span></div>
+                </div>
+                <div>
+                  <div class="row"><strong style="font-size: 13px;">API Integration</strong><span style="font-size: 12px;">92%</span></div>
+                  <div class="progress"><span style="width:92%"></span></div>
+                </div>
+              </div>
+              <div class="tech-stack">
+                <div class="tech">🌐 HTML5</div>
+                <div class="tech">🎨 CSS3</div>
+                <div class="tech">⚡ JavaScript</div>
+                <div class="tech">🤖 Bots</div>
+                <div class="tech">🔗 APIs</div>
+                <div class="tech">☁️ Automation</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONTACT & SOCIAL MEDIA HUB -->
+        <section id="page-contact" class="page">
+          <div class="grid cards-2">
+            <div class="card fade-in">
+              <div class="section-title">
+                <div>
+                  <h3>Contact & Links</h3>
+                  <p>Fast Response & Social Media Hub</p>
+                </div>
+              </div>
+              
+              <h4 style="margin: 8px 0 4px; font-size: 13px; color: var(--primary);">⚡ FAST RESPONSE</h4>
+              <div class="social-contact-grid">
+                <!-- WhatsApp -->
+                <a href="https://wa.me/DEV.ALPHA" target="_blank" class="social-card wa">
+                  <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                  WhatsApp Direct
+                </a>
+
+                <!-- WhatsApp Call -->
+                <a href="https://goo.su/WypXRgQ" target="_blank" class="social-card wa">
+                  <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                  WhatsApp Call
+                </a>
+
+                <!-- Telegram -->
+                <a href="https://t.me/dev_alpha_dev" target="_blank" class="social-card tg">
+                  <svg viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.941z"/></svg>
+                  Telegram
+                </a>
+              </div>
+
+              <h4 style="margin: 12px 0 4px; font-size: 13px; color: var(--secondary);">🌐 SOCIAL MEDIA PLATFORMS</h4>
+              <div class="social-contact-grid">
+                <!-- Website -->
+                <a href="https://goo.su/jP5pB" target="_blank" class="social-card">
+                  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                  Website
+                </a>
+
+                <!-- Facebook -->
+                <a href="https://goo.su/KAevplG" target="_blank" class="social-card fb">
+                  <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  Facebook
+                </a>
+
+                <!-- Instagram -->
+                <a href="https://goo.su/kPgq" target="_blank" class="social-card ig">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                  Instagram
+                </a>
+
+                <!-- TikTok -->
+                <a href="https://goo.su/G1r0bRL" target="_blank" class="social-card tt">
+                  <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.67 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.82.57-1.33 1.54-1.34 2.55-.01.8.31 1.59.88 2.13.7.67 1.73.95 2.67.74.96-.2 1.75-.92 2.05-1.86.13-.42.2-.87.2-1.31.01-4.22.01-8.44.01-12.66z"/></svg>
+                  TikTok
+                </a>
+              </div>
+            </div>
+
+            <div class="card fade-in">
+              <h3 style="margin-bottom:8px; font-size: 1.3rem;">Send a Direct Message</h3>
+              <form id="contactForm">
+                <input class="input" id="contactName" placeholder="Name" />
+                <input class="input" id="contactEmail" placeholder="Email" />
+                <textarea id="contactMessage" placeholder="Message"></textarea>
+                <div id="contactMsg"></div>
+                <button class="btn" type="submit">Send Message</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- FEEDBACK -->
+        <section id="page-feedback" class="page">
+          <div class="grid cards-2">
+            <div class="card fade-in">
+              <div class="section-title">
+                <div>
+                  <h3>Feedback</h3>
+                  <p>Share your thoughts</p>
+                </div>
+              </div>
+              <form id="feedbackForm">
+                <input class="input" id="feedbackName" placeholder="Your Name" />
+                <textarea id="feedbackText" placeholder="Your feedback"></textarea>
+                <div id="feedbackMsg"></div>
+                <button class="btn secondary" type="submit">Submit Feedback</button>
+              </form>
+            </div>
+            <div class="card fade-in">
+              <h3 style="margin-bottom:10px; font-size: 1.3rem;">Community Feedback</h3>
+              <div id="feedbackList" class="list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ADMIN -->
+        <section id="page-admin" class="page">
+          <div class="section-title">
+            <div>
+              <h3>Admin Dashboard</h3>
+              <p>Manage users, projects, services, bots, feedback, and content</p>
+            </div>
+          </div>
+
+          <div class="admin-grid">
+            <div>
+              <div class="grid cards-4" id="adminStats"></div>
+
+              <div class="card" style="margin-top:14px;">
+                <div class="admin-tabs">
+                  <button class="btn small" onclick="setAdminTab('users')">Users</button>
+                  <button class="btn small secondary" onclick="setAdminTab('projects')">Projects</button>
+                  <button class="btn small" onclick="setAdminTab('services')">Services</button>
+                  <button class="btn small secondary" onclick="setAdminTab('bots')">Bots</button>
+                  <button class="btn small" onclick="setAdminTab('feedback')">Feedback</button>
+                  <button class="btn small secondary" onclick="setAdminTab('messages')">Messages</button>
+                </div>
+
+                <div id="adminContent"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card">
+                <h3 style="margin-bottom:10px; font-size: 1.3rem;">Content Manager</h3>
+                <form id="adminContentForm">
+                  <select id="adminType">
+                    <option value="projects">Project</option>
+                    <option value="services">Service</option>
+                    <option value="bots">Bot</option>
+                  </select>
+                  <input class="input" id="adminTitle" placeholder="Title" />
+                  <input class="input" id="adminDesc" placeholder="Description" />
+                  <input class="input" id="adminImage" placeholder="Image URL" />
+                  <input class="input" id="adminTag" placeholder="Tag / Category" />
+                  <label class="small-muted"><input type="checkbox" id="adminFeatured" /> Featured / Top Project</label>
+                  <input type="hidden" id="adminEditId" />
+                  <div id="adminFormMsg"></div>
+                  <button class="btn" type="submit">Save Content</button>
+                </form>
+              </div>
+
+              <div class="card" style="margin-top:14px;">
+                <h3 style="margin-bottom:8px; font-size: 1.2rem;">Admin Tips</h3>
+                <p class="small-muted" style="line-height:1.6;">
+                  Add, edit, and delete content live. Dashboard stats update automatically from localStorage.
+                  All user messages, feedback, and portfolio items persist in browser storage.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <audio id="ambientAudio" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_ebf2f6a7d1.mp3?filename=ocean-waves-112906.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const STORAGE_KEYS = {
+      users: 'alpha_users',
+      currentUser: 'alpha_current_user',
+      theme: 'alpha_theme',
+      projects: 'alpha_projects',
+      services: 'alpha_services',
+      bots: 'alpha_bots',
+      feedback: 'alpha_feedback',
+      messages: 'alpha_messages'
+    };
+
+    const defaultProjects = [
+      {id:id(), title:'Cyber Commerce', desc:'Modern e-commerce experience with bold UI and animated product flow.', image:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1000&q=80', tag:'Web App', featured:true},
+      {id:id(), title:'Blue Admin Suite', desc:'Glassmorphism analytics dashboard with smart widgets and reports.', image:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80', tag:'Dashboard', featured:true},
+      {id:id(), title:'Cyber UI Kit', desc:'Colorful design system with cyber palette and reusable components.', image:'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1000&q=80', tag:'UI/UX', featured:true},
+      {id:id(), title:'Wave Portfolio', desc:'Interactive personal website with SPA navigation and animations.', image:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1000&q=80', tag:'Portfolio', featured:true},
+      {id:id(), title:'Cloud Booking', desc:'Travel booking layout with smooth transitions and search UX.', image:'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1000&q=80', tag:'Travel', featured:true},
+      {id:id(), title:'Aqua CRM', desc:'Customer management system with elegant cards and productivity tools.', image:'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1000&q=80', tag:'CRM', featured:true},
+      {id:id(), title:'Neon Studio', desc:'Creative agency website with motion sections and service blocks.', image:'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=1000&q=80', tag:'Agency', featured:false},
+      {id:id(), title:'Cyber Learn', desc:'Learning platform with dashboards, lessons, and progress flows.', image:'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1000&q=80', tag:'Education', featured:false},
+      {id:id(), title:'Lagoon Finance', desc:'Financial app UI with clean charts, alerts, and secure flows.', image:'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1000&q=80', tag:'Fintech', featured:false}
+    ];
+
+    const defaultServices = [
+      {id:id(), title:'Web Development', desc:'Responsive websites and advanced web apps tailored for performance and style.', image:'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1000&q=80', tag:'Frontend'},
+      {id:id(), title:'UI/UX Design', desc:'Clean interfaces, joyful interactions, and strong visual identity systems.', image:'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=1000&q=80', tag:'Design'},
+      {id:id(), title:'Bot Development', desc:'Telegram, WhatsApp, and custom bots for automation and engagement.', image:'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?auto=format&fit=crop&w=1000&q=80', tag:'Bots'},
+      {id:id(), title:'Automation Systems', desc:'Workflow automation to reduce repetitive tasks and improve efficiency.', image:'https://images.unsplash.com/photo-1516321165247-4aa89a48be28?auto=format&fit=crop&w=1000&q=80', tag:'Automation'},
+      {id:id(), title:'API Integration', desc:'Connect apps with third-party services, payment flows, and data systems.', image:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1000&q=80', tag:'Integration'},
+      {id:id(), title:'WhatsApp Bot Creation', desc:'Build WhatsApp-powered support, order, and notification workflows.', image:'https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&w=1000&q=80', tag:'WhatsApp'}
+    ];
+
+    const defaultBots = [
+      {id:id(), title:'Social Downloader', desc:'Download helper bot for social media content processing.', image:'https://images.unsplash.com/photo-1516321310764-8d0f3f4c8c76?auto=format&fit=crop&w=1000&q=80', tag:'Downloader'},
+      {id:id(), title:'Telegram Bot', desc:'Feature-rich Telegram assistant for alerts, tools, and commands.', image:'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1000&q=80', tag:'Telegram'},
+      {id:id(), title:'WhatsApp Bot', desc:'Customer support and automation assistant for WhatsApp users.', image:'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?auto=format&fit=crop&w=1000&q=80', tag:'WhatsApp'},
+      {id:id(), title:'AI Chat Bot', desc:'Conversational AI experience with prompt logic and smart replies.', image:'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1000&q=80', tag:'AI'}
+    ];
+
+    function id(){
+      return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    }
+
+    function getData(key, fallback=[]){
+      try{
+        return JSON.parse(localStorage.getItem(key)) ?? fallback;
+      }catch(e){ return fallback; }
+    }
+    function setData(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function initData(){
+      if(!localStorage.getItem(STORAGE_KEYS.users)){
+        setData(STORAGE_KEYS.users, []);
+      }
+      if(!localStorage.getItem(STORAGE_KEYS.projects)){
+        setData(STORAGE_KEYS.projects, defaultProjects);
+      }
+      if(!localStorage.getItem(STORAGE_KEYS.services)){
+        setData(STORAGE_KEYS.services, defaultServices);
+      }
+      if(!localStorage.getItem(STORAGE_KEYS.bots)){
+        setData(STORAGE_KEYS.bots, defaultBots);
+      }
+      if(!localStorage.getItem(STORAGE_KEYS.feedback)){
+        setData(STORAGE_KEYS.feedback, [
+          {id:id(), name:'Lina', message:'Beautiful design and smooth experience!'},
+          {id:id(), name:'Rayan', message:'Loved the services layout and glowing project cards.'}
+        ]);
+      }
+      if(!localStorage.getItem(STORAGE_KEYS.messages)){
+        setData(STORAGE_KEYS.messages, []);
+      }
+    }
+
+    function switchAuthTab(tab){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      if(tab==='login'){
+        document.querySelectorAll('.tab')[0].classList.add('active');
+        loginTab.classList.remove('hidden');
+        registerTab.classList.add('hidden');
+      }else{
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        registerTab.classList.remove('hidden');
+        loginTab.classList.add('hidden');
+      }
+    }
+
+    function registerUser(e){
+      e.preventDefault();
+      const username = regUsername.value.trim();
+      const email = regEmail.value.trim().toLowerCase();
+      const password = regPassword.value.trim();
+
+      if(!username || !email || !password){
+        registerMsg.innerHTML = `<div class="error">All fields are required.</div>`;
+        return;
+      }
+      if(password.length < 4){
+        registerMsg.innerHTML = `<div class="error">Password must be at least 4 characters.</div>`;
+        return;
+      }
+
+      const users = getData(STORAGE_KEYS.users);
+      const exists = users.some(u => u.username.toLowerCase() === username.toLowerCase() || u.email === email);
+      if(exists){
+        registerMsg.innerHTML = `<div class="error">Username or email already exists.</div>`;
+        return;
+      }
+
+      users.push({id:id(), username, email, password, role:'user'});
+      setData(STORAGE_KEYS.users, users);
+      registerMsg.innerHTML = `<div class="success">Registration successful. You can now login.</div>`;
+      notify('Account created successfully.');
+      e.target.reset();
+      setTimeout(()=>switchAuthTab('login'), 600);
+    }
+
+    function loginUser(e){
+      e.preventDefault();
+      const userInput = loginUserEl.value.trim();
+      const password = loginPass.value.trim();
+
+      if(userInput === 'ALPHA' && password === 'ALPHA'){
+        const admin = {id:'admin-alpha', username:'ALPHA', email:'admin@alpha.local', role:'admin'};
+        localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(admin));
+        afterLogin();
+        notify('Admin login successful.');
+        return;
+      }
+
+      const users = getData(STORAGE_KEYS.users);
+      const user = users.find(u =>
+        (u.username.toLowerCase() === userInput.toLowerCase() || u.email.toLowerCase() === userInput.toLowerCase())
+        && u.password === password
+      );
+
+      if(!user){
+        loginMsg.innerHTML = `<div class="error">Invalid username/email or password.</div>`;
+        return;
+      }
+
+      localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(user));
+      if(rememberMe.checked){
+        localStorage.setItem('alpha_remember', '1');
+      }else{
+        localStorage.removeItem('alpha_remember');
+      }
+      notify('Login successful.');
+      afterLogin();
+    }
+
+    function logout(){
+      localStorage.removeItem(STORAGE_KEYS.currentUser);
+      appView.classList.add('hidden');
+      authView.classList.remove('hidden');
+      switchAuthTab('login');
+      notify('Logged out successfully.');
+    }
+
+    function getCurrentUser(){
+      try{
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.currentUser));
+      }catch(e){ return null; }
+    }
+
+    function afterLogin(){
+      authView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      const user = getCurrentUser();
+      welcomeUser.textContent = `Hi, ${user?.username || 'Guest'}`;
+      adminNavBtn.classList.toggle('hidden', user?.role !== 'admin' && user?.username !== 'ALPHA');
+      renderAll();
+      goPage('home');
+    }
+
+    function cardTemplate(item, options={}){
+      const badge = options.featuredBadge ? `<div class="project-badge">🏆 Top Project</div>` : '';
+      return `
+        <div class="card ${options.glow ? 'glow' : ''} fade-in">
+          ${badge}
+          <img class="project-img" src="${item.image}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/400x200/0284c7/ffffff?text=PROJECT+ASSET'" />
+          <h4 style="font-size: 15px;">${item.title}</h4>
+          <div class="meta">
+            ${item.tag ? `<span class="pill">${item.tag}</span>` : ''}
+            ${item.featured ? `<span class="pill">Featured</span>` : ''}
+          </div>
+          <p style="color:var(--text-soft);line-height:1.5;margin:6px 0 10px; font-size: 12px;">${item.desc}</p>
+          <button class="btn small" onclick="notify('Opened ${escapeQ(item.title)}')">View Project</button>
+        </div>
+      `;
+    }
+
+    function serviceTemplate(item){
+      return `
+        <div class="card fade-in">
+          <div class="icon-circle">💎</div>
+          <img class="project-img" src="${item.image}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/400x200/0ea5e9/ffffff?text=SERVICE'" />
+          <h4 style="font-size: 15px;">${item.title}</h4>
+          <div class="meta">${item.tag ? `<span class="pill">${item.tag}</span>` : ''}</div>
+          <p style="color:var(--text-soft);line-height:1.5; font-size: 12px;">${item.desc}</p>
+        </div>
+      `;
+    }
+
+    function botTemplate(item){
+      return `
+        <div class="card fade-in">
+          <div class="icon-circle">🤖</div>
+          <img class="project-img" src="${item.image}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/400x200/38bdf8/ffffff?text=BOT'" />
+          <h4 style="font-size: 15px;">${item.title}</h4>
+          <div class="meta">${item.tag ? `<span class="pill">${item.tag}</span>` : ''}</div>
+          <p style="color:var(--text-soft);line-height:1.5;margin-bottom:10px; font-size: 12px;">${item.desc}</p>
+          <button class="btn small secondary" onclick="notify('Bot preview: ${escapeQ(item.title)}')">Preview</button>
+        </div>
+      `;
+    }
+
+    function renderHome(){
+      const projects = getData(STORAGE_KEYS.projects);
+      homeFeatured.innerHTML = projects.filter(p=>p.featured).slice(0,3).map(p=>cardTemplate(p,{featuredBadge:true, glow:true})).join('');
+      latestWorks.innerHTML = projects.slice(0,4).map(p=>cardTemplate(p)).join('');
+    }
+
+    function renderWorks(filter=''){
+      const projects = getData(STORAGE_KEYS.projects);
+      const data = projects.filter(p => matchFilter(p, filter));
+      worksGrid.innerHTML = data.map(p=>cardTemplate(p)).join('') || emptyState('No projects found.');
+    }
+
+    function renderServices(filter=''){
+      const services = getData(STORAGE_KEYS.services);
+      const data = services.filter(s => matchFilter(s, filter));
+      servicesGrid.innerHTML = data.map(serviceTemplate).join('') || emptyState('No services found.');
+    }
+
+    function renderBots(filter=''){
+      const bots = getData(STORAGE_KEYS.bots);
+      const data = bots.filter(b => matchFilter(b, filter));
+      botsGrid.innerHTML = data.map(botTemplate).join('') || emptyState('No bots found.');
+    }
+
+    function renderFeatured(filter=''){
+      const projects = getData(STORAGE_KEYS.projects).filter(p=>p.featured).filter(p=>matchFilter(p, filter)).slice(0,6);
+      featuredGrid.innerHTML = projects.map(p=>cardTemplate(p,{featuredBadge:true, glow:true})).join('') || emptyState('No featured projects found.');
+    }
+
+    function renderFeedback(){
+      const list = getData(STORAGE_KEYS.feedback);
+      feedbackList.innerHTML = list.map(f=>`
+        <div class="card" style="padding:10px;">
+          <div class="row">
+            <strong style="font-size: 13px;">${f.name}</strong>
+            ${isAdmin() ? `<button class="btn small danger" onclick="deleteFeedback('${f.id}')">Delete</button>` : ''}
+          </div>
+          <p style="color:var(--text-soft);margin-top:6px;line-height:1.5; font-size: 12px;">${f.message}</p>
+        </div>
+      `).join('') || emptyState('No feedback yet.');
+    }
+
+    function renderAdmin(){
+      if(!isAdmin()){
+        adminContent.innerHTML = `<div class="error">Access denied.</div>`;
+        return;
+      }
+
+      const users = getData(STORAGE_KEYS.users);
+      const projects = getData(STORAGE_KEYS.projects);
+      const services = getData(STORAGE_KEYS.services);
+      const bots = getData(STORAGE_KEYS.bots);
+      const feedback = getData(STORAGE_KEYS.feedback);
+      const messages = getData(STORAGE_KEYS.messages);
+
+      adminStats.innerHTML = `
+        ${statCard('👥', users.length, 'Users')}
+        ${statCard('🧩', projects.length, 'Projects')}
+        ${statCard('🛠️', services.length, 'Services')}
+        ${statCard('🤖', bots.length, 'Bots')}
+      `;
+
+      renderAdminTab(activeAdminTab);
+    }
+
+    function statCard(icon, count, label){
+      return `
+        <div class="card stat">
+          <div class="icon-circle" style="margin:0 auto 6px;">${icon}</div>
+          <h4>${count}</h4>
+          <p>${label}</p>
+        </div>
+      `;
+    }
+
+    let activeAdminTab = 'users';
+    function setAdminTab(tab){
+      activeAdminTab = tab;
+      renderAdminTab(tab);
+    }
+
+    function renderAdminTab(tab){
+      const users = getData(STORAGE_KEYS.users);
+      const projects = getData(STORAGE_KEYS.projects);
+      const services = getData(STORAGE_KEYS.services);
+      const bots = getData(STORAGE_KEYS.bots);
+      const feedback = getData(STORAGE_KEYS.feedback);
+      const messages = getData(STORAGE_KEYS.messages);
+
+      if(tab==='users'){
+        adminContent.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
+              <tbody>
+                ${users.map(u=>`
+                  <tr>
+                    <td>${u.username}</td>
+                    <td>${u.email}</td>
+                    <td>${u.role || 'user'}</td>
+                    <td><button class="btn small danger" onclick="deleteUser('${u.id}')">Delete</button></td>
+                  </tr>
+                `).join('') || `<tr><td colspan="4">No users</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      if(tab==='projects'){
+        adminContent.innerHTML = adminTable(projects, 'projects');
+      }
+      if(tab==='services'){
+        adminContent.innerHTML = adminTable(services, 'services');
+      }
+      if(tab==='bots'){
+        adminContent.innerHTML = adminTable(bots, 'bots');
+      }
+      if(tab==='feedback'){
+        adminContent.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Message</th><th>Action</th></tr></thead>
+              <tbody>
+                ${feedback.map(f=>`
+                  <tr>
+                    <td>${f.name}</td>
+                    <td>${f.message}</td>
+                    <td><button class="btn small danger" onclick="deleteFeedback('${f.id}')">Delete</button></td>
+                  </tr>
+                `).join('') || `<tr><td colspan="3">No feedback</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      if(tab==='messages'){
+        adminContent.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Message</th></tr></thead>
+              <tbody>
+                ${messages.map(m=>`
+                  <tr>
+                    <td>${m.name}</td>
+                    <td>${m.email}</td>
+                    <td>${m.message}</td>
+                  </tr>
+                `).join('') || `<tr><td colspan="3">No messages</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    }
+
+    function adminTable(items, type){
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Title</th><th>Description</th><th>Image</th><th>Action</th></tr></thead>
+            <tbody>
+              ${items.map(item=>`
+                <tr>
+                  <td>${item.title}</td>
+                  <td>${item.desc}</td>
+                  <td><a href="${item.image}" target="_blank">Image Link</a></td>
+                  <td>
+                    <button class="btn small" onclick="editItem('${type}','${item.id}')">Edit</button>
+                    <button class="btn small danger" onclick="deleteItem('${type}','${item.id}')">Delete</button>
+                  </td>
+                </tr>
+              `).join('') || `<tr><td colspan="4">No items</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderAll(search=''){
+      renderHome();
+      renderWorks(search);
+      renderServices(search);
+      renderBots(search);
+      renderFeatured(search);
+      renderFeedback();
+      renderAdmin();
+      observeFadeIns();
+    }
+
+    function emptyState(text){
+      return `<div class="card"><p style="color:var(--text-soft); font-size:13px;">${text}</p></div>`;
+    }
+
+    function deleteUser(uid){
+      let users = getData(STORAGE_KEYS.users);
+      users = users.filter(u=>u.id !== uid);
+      setData(STORAGE_KEYS.users, users);
+      renderAdmin();
+      notify('User deleted.');
+    }
+
+    function deleteFeedback(fid){
+      let feedback = getData(STORAGE_KEYS.feedback);
+      feedback = feedback.filter(f=>f.id !== fid);
+      setData(STORAGE_KEYS.feedback, feedback);
+      renderFeedback();
+      renderAdmin();
+      notify('Feedback deleted.');
+    }
+
+    function deleteItem(type, itemId){
+      const key = STORAGE_KEYS[type];
+      let items = getData(key);
+      items = items.filter(i=>i.id !== itemId);
+      setData(key, items);
+      renderAll(globalSearch.value.trim());
+      notify(`${type.slice(0,-1)} deleted.`);
+    }
+
+    function editItem(type, itemId){
+      const key = STORAGE_KEYS[type];
+      const item = getData(key).find(i=>i.id===itemId);
+      if(!item) return;
+      adminType.value = type;
+      adminTitle.value = item.title;
+      adminDesc.value = item.desc;
+      adminImage.value = item.image;
+      adminTag.value = item.tag || '';
+      adminFeatured.checked = !!item.featured;
+      adminEditId.value = item.id;
+      adminFormMsg.innerHTML = `<div class="success">Editing ${item.title}</div>`;
+      notify('Loaded item into editor.');
+    }
+
+    function saveAdminContent(e){
+      e.preventDefault();
+      const type = adminType.value;
+      const key = STORAGE_KEYS[type];
+      const title = adminTitle.value.trim();
+      const desc = adminDesc.value.trim();
+      const image = adminImage.value.trim();
+      const tag = adminTag.value.trim();
+      const featured = adminFeatured.checked;
+      const editId = adminEditId.value;
+
+      if(!title || !desc || !image){
+        adminFormMsg.innerHTML = `<div class="error">Title, description, and image are required.</div>`;
+        return;
+      }
+
+      let items = getData(key);
+      if(editId){
+        items = items.map(i => i.id===editId ? {...i, title, desc, image, tag, featured} : i);
+        adminFormMsg.innerHTML = `<div class="success">Updated successfully.</div>`;
+        notify('Content updated.');
+      }else{
+        items.unshift({id:id(), title, desc, image, tag, featured});
+        adminFormMsg.innerHTML = `<div class="success">Added successfully.</div>`;
+        notify('Content added.');
+      }
+
+      setData(key, items);
+      adminContentForm.reset();
+      adminEditId.value = '';
+      renderAll(globalSearch.value.trim());
+    }
+
+    function submitContact(e){
+      e.preventDefault();
+      const name = contactName.value.trim();
+      const email = contactEmail.value.trim();
+      const message = contactMessage.value.trim();
+
+      if(!name || !email || !message){
+        contactMsg.innerHTML = `<div class="error">All fields are required.</div>`;
+        return;
+      }
+
+      const messages = getData(STORAGE_KEYS.messages);
+      messages.unshift({id:id(), name, email, message, date:new Date().toLocaleString()});
+      setData(STORAGE_KEYS.messages, messages);
+      contactMsg.innerHTML = `<div class="success">Message saved successfully.</div>`;
+      notify('Message sent and saved.');
+      contactForm.reset();
+      renderAdmin();
+    }
+
+    function submitFeedback(e){
+      e.preventDefault();
+      const name = feedbackName.value.trim() || (getCurrentUser()?.username || 'Anonymous');
+      const message = feedbackText.value.trim();
+
+      if(!message){
+        feedbackMsg.innerHTML = `<div class="error">Please enter feedback.</div>`;
+        return;
+      }
+
+      const feedback = getData(STORAGE_KEYS.feedback);
+      feedback.unshift({id:id(), name, message});
+      setData(STORAGE_KEYS.feedback, feedback);
+      feedbackMsg.innerHTML = `<div class="success">Feedback submitted.</div>`;
+      notify('Thanks for your feedback!');
+      feedbackForm.reset();
+      renderFeedback();
+      renderAdmin();
+    }
+
+    function goPage(page){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById(`page-${page}`).classList.add('active');
+
+      document.querySelectorAll('.side-link').forEach(l=>l.classList.remove('active'));
+      const activeBtn = document.querySelector(`.side-link[data-page="${page}"]`);
+      if(activeBtn) activeBtn.classList.add('active');
+
+      if(window.innerWidth <= 900){
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+      }
+      observeFadeIns();
+    }
+
+    function toggleSidebar(){
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('show');
+    }
+
+    document.querySelectorAll('.side-link').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const page = btn.dataset.page;
+        if(page==='admin' && !isAdmin()) return notify('Admin access only.');
+        goPage(page);
+      });
+    });
+
+    function notify(message){
+      notifyEl.textContent = message;
+      notifyEl.classList.add('show');
+      clearTimeout(window.notifyTimer);
+      window.notifyTimer = setTimeout(()=>notifyEl.classList.remove('show'), 2600);
+    }
+
+    function isAdmin(){
+      const user = getCurrentUser();
+      return user && (user.role === 'admin' || user.username === 'ALPHA');
+    }
+
+    function escapeQ(str){
+      return String(str).replace(/'/g,"\\'");
+    }
+
+    function matchFilter(item, filter){
+      if(!filter) return true;
+      const s = filter.toLowerCase();
+      return `${item.title} ${item.desc} ${item.tag || ''}`.toLowerCase().includes(s);
+    }
+
+    function observeFadeIns(){
+      const io = new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, {threshold:.12});
+      document.querySelectorAll('.fade-in').forEach(el=>io.observe(el));
+    }
+
+    function applyTheme(){
+      const theme = localStorage.getItem(STORAGE_KEYS.theme) || 'light';
+      document.body.classList.toggle('dark', theme==='dark');
+    }
+
+    function toggleTheme(){
+      const isDark = document.body.classList.toggle('dark');
+      localStorage.setItem(STORAGE_KEYS.theme, isDark ? 'dark' : 'light');
+      notify(isDark ? 'Dark mode enabled.' : 'Light mode enabled.');
+    }
+
+    globalSearch.addEventListener('input', e=>{
+      renderAll(e.target.value.trim());
+    });
+
+    function initParticles(){
+      const canvas = document.getElementById('particles');
+      const ctx = canvas.getContext('2d');
+      let w,h,particles=[];
+      const count = 45; // optimized count for performance and smooth UI
+
+      function resize(){
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function create(){
+        particles = Array.from({length:count},()=>({
+          x:Math.random()*w,
+          y:Math.random()*h,
+          r:Math.random()*2.5+1,
+          dx:(Math.random()-.5)*0.5,
+          dy:(Math.random()-.5)*0.5,
+          c:['#00f0ff','#38bdf8','#0284c7','#0ea5e9'][Math.floor(Math.random()*4)]
+        }));
+      }
+      create();
+
+      function draw(){
+        ctx.clearRect(0,0,w,h);
+        for(const p of particles){
+          ctx.beginPath();
+          ctx.fillStyle = p.c;
+          ctx.globalAlpha = .5;
+          ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          ctx.fill();
+
+          p.x += p.dx;
+          p.y += p.dy;
+
+          if(p.x<0||p.x>w) p.dx *= -1;
+          if(p.y<0||p.y>h) p.dy *= -1;
+        }
+
+        for(let i=0;i<particles.length;i++){
+          for(let j=i+1;j<particles.length;j++){
+            const a=particles[i], b=particles[j];
+            const d=Math.hypot(a.x-b.x,a.y-b.y);
+            if(d<100){
+              ctx.strokeStyle = 'rgba(0,240,255,.12)';
+              ctx.globalAlpha = 1 - d/100;
+              ctx.lineWidth = .7;
+              ctx.beginPath();
+              ctx.moveTo(a.x,a.y);
+              ctx.lineTo(b.x,b.y);
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    const loginUserEl = document.getElementById('loginUser');
+    const notifyEl = document.getElementById('notify');
+
+    registerForm.addEventListener('submit', registerUser);
+    loginForm.addEventListener('submit', loginUser);
+    contactForm.addEventListener('submit', submitContact);
+    feedbackForm.addEventListener('submit', submitFeedback);
+    adminContentForm.addEventListener('submit', saveAdminContent);
+
+    window.addEventListener('load', ()=>{
+      initData();
+      applyTheme();
+      initParticles();
+
+      setTimeout(()=>loader.classList.add('hidden'), 500);
+
+      const user = getCurrentUser();
+      if(user){
+        afterLogin();
+      }else{
+        authView.classList.remove('hidden');
+      }
+      observeFadeIns();
+    });
+  </script>
+</body>
+</html>
