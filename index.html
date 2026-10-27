@@ -679,6 +679,23 @@
     @keyframes spin{to{transform:rotate(360deg)}}
 
     .small-muted{font-size:11px;color:var(--text-soft)}
+    .guest-divider{display:flex;align-items:center;gap:10px;margin:13px 0 10px;color:var(--text-soft);font-size:10px}
+    .guest-divider::before,.guest-divider::after{content:"";height:1px;flex:1;background:var(--border)}
+    .guest-btn{width:100%;border-color:rgba(0,240,255,.45)}
+    .guest-note{text-align:center;margin-top:8px}
+    .audio-watermark{
+      position:fixed;right:12px;bottom:12px;z-index:250;
+      display:flex;align-items:center;gap:6px;padding:7px 10px;
+      border:1px solid rgba(0,240,255,.4);border-radius:20px;
+      background:rgba(5,12,24,.78);color:#dffbff;font-size:11px;font-weight:700;
+      box-shadow:0 3px 14px rgba(0,0,0,.22);backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);cursor:pointer;opacity:.82;
+      transition:opacity .2s,transform .2s;
+    }
+    .audio-watermark:hover{opacity:1;transform:translateY(-2px)}
+    .audio-watermark .audio-icon{font-size:14px;line-height:1}
+    .audio-watermark[aria-pressed="true"]{border-color:rgba(148,163,184,.55);color:#d1d5db}
+    @media(max-width:480px){.audio-watermark{right:8px;bottom:8px;padding:7px 9px;font-size:10px}}
     .welcome-user{
       font-weight:700;
       padding:6px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--border);
@@ -757,6 +774,9 @@
   </div>
 
   <div id="notify" class="notify"></div>
+  <button id="audioToggle" class="audio-watermark" type="button" aria-label="Stop background music" aria-pressed="false" onclick="toggleBackgroundMusic()" title="Stop background music">
+    <span class="audio-icon" aria-hidden="true">♫</span><span id="audioToggleLabel">Music On</span>
+  </button>
 
   <!-- AUTH -->
   <section id="authView" class="auth-shell">
@@ -787,6 +807,9 @@
             <div id="loginMsg"></div>
             <button class="btn" type="submit">Login</button>
           </form>
+          <div class="guest-divider"><span>OR</span></div>
+          <button class="btn ghost guest-btn" type="button" onclick="joinAsGuest()">Join with a Guest</button>
+          <p class="small-muted guest-note">Explore the website without creating an account.</p>
         </div>
 
         <!-- REGISTER -->
@@ -1023,7 +1046,7 @@
               <h4 style="margin: 8px 0 4px; font-size: 13px; color: var(--primary);">⚡ FAST RESPONSE</h4>
               <div class="social-contact-grid">
                 <!-- WhatsApp -->
-                <a href="https://wa.me/DEV.ALPHA" target="_blank" class="social-card wa">
+                <a href="https://wa.me/message/HDGOKQNY5JRGF1" target="_blank" class="social-card wa">
                   <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
                   WhatsApp Direct
                 </a>
@@ -1167,9 +1190,110 @@
     </main>
   </div>
 
-  <audio id="ambientAudio" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_ebf2f6a7d1.mp3?filename=ocean-waves-112906.mp3" type="audio/mpeg">
+  <audio id="ambientAudio" autoplay loop preload="auto" playsinline>
+    <source src="https://files.catbox.moe/c2zrdv.mp3" type="audio/mpeg">
   </audio>
+  <script>
+    // Background music: attempt autoplay, then retry after the first user interaction
+    // if the browser blocks playback. Audio is intentionally not muted.
+    (function () {
+      const backgroundMusic = document.getElementById('ambientAudio');
+      if (!backgroundMusic) return;
+
+      backgroundMusic.loop = true;
+      backgroundMusic.autoplay = true;
+      backgroundMusic.muted = false;
+
+      const retryOnInteraction = () => {
+        if (!backgroundMusic.paused) {
+          removeInteractionListeners();
+          return;
+        }
+        const playback = backgroundMusic.play();
+        if (playback && typeof playback.then === 'function') {
+          playback.then(removeInteractionListeners).catch(() => {
+            // Keep listeners in place in case the browser still blocks playback.
+          });
+        }
+      };
+
+      function removeInteractionListeners() {
+        document.removeEventListener('click', retryOnInteraction, true);
+        document.removeEventListener('touchstart', retryOnInteraction, true);
+        document.removeEventListener('keydown', retryOnInteraction, true);
+        document.removeEventListener('pointerdown', retryOnInteraction, true);
+      }
+
+      document.addEventListener('click', retryOnInteraction, true);
+      document.addEventListener('touchstart', retryOnInteraction, true);
+      document.addEventListener('keydown', retryOnInteraction, true);
+      document.addEventListener('pointerdown', retryOnInteraction, true);
+
+      const attemptAutoplay = () => {
+        const playback = backgroundMusic.play();
+        if (playback && typeof playback.catch === 'function') {
+          playback.catch(() => {
+            // Autoplay may require a user gesture; interaction listeners retry it.
+          });
+        }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attemptAutoplay, { once: true });
+      } else {
+        attemptAutoplay();
+      }
+
+      window.toggleBackgroundMusic = function () {
+        const toggle = document.getElementById('audioToggle');
+        const label = document.getElementById('audioToggleLabel');
+        if (backgroundMusic.paused) {
+          const playback = backgroundMusic.play();
+          if (playback && typeof playback.then === 'function') {
+            playback.then(() => {
+              if (label) label.textContent = 'Music On';
+              if (toggle) {
+                toggle.setAttribute('aria-label', 'Stop background music');
+                toggle.setAttribute('aria-pressed', 'false');
+                toggle.title = 'Stop background music';
+              }
+            }).catch(() => {
+              if (label) label.textContent = 'Tap to Play';
+            });
+          }
+        } else {
+          backgroundMusic.pause();
+          if (label) label.textContent = 'Music Off';
+          if (toggle) {
+            toggle.setAttribute('aria-label', 'Play background music');
+            toggle.setAttribute('aria-pressed', 'true');
+            toggle.title = 'Play background music';
+          }
+        }
+      };
+
+      backgroundMusic.addEventListener('play', () => {
+        const toggle = document.getElementById('audioToggle');
+        const label = document.getElementById('audioToggleLabel');
+        if (label) label.textContent = 'Music On';
+        if (toggle) {
+          toggle.setAttribute('aria-label', 'Stop background music');
+          toggle.setAttribute('aria-pressed', 'false');
+          toggle.title = 'Stop background music';
+        }
+      });
+      backgroundMusic.addEventListener('pause', () => {
+        const toggle = document.getElementById('audioToggle');
+        const label = document.getElementById('audioToggleLabel');
+        if (label) label.textContent = 'Music Off';
+        if (toggle) {
+          toggle.setAttribute('aria-label', 'Play background music');
+          toggle.setAttribute('aria-pressed', 'true');
+          toggle.title = 'Play background music';
+        }
+      });
+    })();
+  </script>
 
   <script>
     const STORAGE_KEYS = {
@@ -1289,6 +1413,14 @@
       notify('Account created successfully.');
       e.target.reset();
       setTimeout(()=>switchAuthTab('login'), 600);
+    }
+
+    function joinAsGuest(){
+      const guest = {id:'guest-session', username:'Guest', email:'', role:'guest'};
+      localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(guest));
+      localStorage.removeItem('alpha_remember');
+      afterLogin();
+      notify('Welcome! You are exploring as a guest.');
     }
 
     function loginUser(e){
