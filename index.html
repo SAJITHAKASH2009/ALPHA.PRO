@@ -761,7 +761,28 @@
       .cloud,.palm{display:none}
       .social-contact-grid{ grid-template-columns: 1fr; }
     }
-  </style>
+  
+    /* Protocol Maker - self-contained page styling */
+    .protocol-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+    .protocol-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+    .protocol-field.full{grid-column:1/-1}
+    .protocol-field label{font-size:12px;color:var(--text-soft);font-weight:700;letter-spacing:.15px}
+    .protocol-field input,.protocol-field textarea,.protocol-field select{width:100%;padding:12px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;outline:none;transition:border-color .2s,box-shadow .2s,transform .2s}
+    .protocol-field input:focus,.protocol-field textarea:focus,.protocol-field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,240,255,.10)}
+    .protocol-field input[type=file]{font-size:12px;padding:10px}
+    .protocol-field textarea{min-height:96px;resize:vertical}
+    .template-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .template-choice{position:relative;border:1px solid var(--border);border-radius:15px;padding:14px;text-align:left;cursor:pointer;background:var(--surface);color:var(--text);transition:transform .2s,border-color .2s,box-shadow .2s;overflow:hidden}
+    .template-choice:before{content:"";display:block;height:42px;border-radius:9px;margin-bottom:12px;background:linear-gradient(120deg,#07111f,#00e5ff)}
+    .template-choice[data-template="minimal"]:before{background:linear-gradient(120deg,#fff,#dbeafe);border:1px solid #dbeafe}
+    .template-choice[data-template="classic"]:before{background:linear-gradient(120deg,#0f766e,#99f6e4)}
+    .template-choice:hover{transform:translateY(-3px)}
+    .template-choice.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 10px 30px rgba(0,240,255,.10)}
+    .coming-soon{display:inline-block;margin-top:5px;padding:4px 8px;border-radius:20px;border:1px solid var(--border);font-size:10px;color:var(--text-soft)}
+    .protocol-wa-notice{position:fixed;z-index:99999;bottom:18px;left:50%;transform:translateX(-50%);width:min(92vw,560px);padding:14px 17px;border:1px solid rgba(0,240,255,.45);border-radius:14px;background:#07111ff2;color:#f5fbff;box-shadow:0 12px 42px #0008;font:13px/1.5 system-ui,sans-serif}
+    .protocol-wa-notice a{color:#00e5ff;font-weight:800;text-decoration:underline}
+    @media(max-width:650px){.protocol-form{grid-template-columns:1fr}.protocol-field.full{grid-column:auto}.template-options{grid-template-columns:1fr}.template-choice{display:grid;grid-template-columns:86px 1fr;column-gap:12px;align-items:center;text-align:left}.template-choice:before{grid-row:span 2;height:54px;margin:0}.template-choice p{margin:3px 0 0}}
+</style>
 </head>
 <body>
   <canvas id="particles"></canvas>
@@ -940,6 +961,48 @@
             </div>
           </div>
           <div id="servicesGrid" class="grid cards-3"></div>
+        </section>
+
+        <!-- PROTOCOL MAKER BUILDER -->
+        <section id="page-protocol-maker" class="page">
+          <div class="section-title">
+            <div><h3>Protocol Maker</h3><p>Build and download your own standalone HTML portfolio</p></div>
+            <button class="btn small ghost" type="button" onclick="goPage('services')">Back to Services</button>
+          </div>
+          <div class="card protocol-card" style="margin-bottom:18px">
+            <h4>Choose a template</h4>
+            <p style="color:var(--text-soft);font-size:12px;margin:6px 0 14px">Pick one design. You can preview the generated file after downloading it.</p>
+            <div class="template-options" id="protocolTemplates">
+              <button type="button" class="template-choice active" data-template="neon" onclick="selectProtocolTemplate('neon')"><strong>01 · Neon</strong><p style="font-size:11px;color:var(--text-soft)">Dark cyan tech style</p></button>
+              <button type="button" class="template-choice" data-template="minimal" onclick="selectProtocolTemplate('minimal')"><strong>02 · Minimal</strong><p style="font-size:11px;color:var(--text-soft)">Clean light portfolio</p></button>
+              <button type="button" class="template-choice" data-template="classic" onclick="selectProtocolTemplate('classic')"><strong>03 · Classic</strong><p style="font-size:11px;color:var(--text-soft)">Professional profile</p></button>
+            </div>
+          </div>
+          <form id="protocolForm" class="card protocol-form">
+            <div class="protocol-field"><label for="pmName">Full name *</label><input id="pmName" required maxlength="100" placeholder="Your full name"></div>
+            <div class="protocol-field"><label for="pmTitle">Professional title</label><input id="pmTitle" maxlength="120" placeholder="e.g. Web Developer, Student, Designer"></div>
+            <div class="protocol-field"><label for="pmAge">Age (optional)</label><input id="pmAge" type="number" min="1" max="120" placeholder="Your age"></div>
+            <div class="protocol-field"><label for="pmPhoto">Profile photo</label><input id="pmPhoto" type="file" accept="image/*"></div>
+            <div class="protocol-field"><label for="pmCV">CV / Resume file (optional)</label><input id="pmCV" type="file" accept=".pdf,.doc,.docx,.txt"></div>
+            <div class="protocol-field"><label for="pmPhone">Phone / WhatsApp</label><input id="pmPhone" type="tel" maxlength="40" placeholder="+94..."></div>
+            <div class="protocol-field"><label for="pmEmail">Email</label><input id="pmEmail" type="email" placeholder="you@example.com"></div>
+            <div class="protocol-field"><label for="pmLocation">Location</label><input id="pmLocation" maxlength="120" placeholder="City, country (optional)"></div>
+            <div class="protocol-field full"><label for="pmAbout">About / Description *</label><textarea id="pmAbout" required maxlength="2500" placeholder="Write a short introduction about yourself"></textarea></div>
+            <div class="protocol-field full"><label for="pmSkills">Skills (comma-separated)</label><input id="pmSkills" placeholder="HTML, CSS, JavaScript, Communication"></div>
+            <div class="protocol-field"><label for="pmEducation">Education</label><textarea id="pmEducation" placeholder="School, qualifications, courses"></textarea></div>
+            <div class="protocol-field"><label for="pmExperience">Experience / Projects</label><textarea id="pmExperience" placeholder="Work experience or projects"></textarea></div>
+            <div class="protocol-field"><label for="pmServices">Services you offer</label><textarea id="pmServices" placeholder="Web design, editing, tutoring..."></textarea></div>
+            <div class="protocol-field"><label for="pmCertificates">Certificates / Achievements</label><textarea id="pmCertificates" placeholder="Certificates, awards, accomplishments"></textarea></div>
+            <div class="protocol-field"><label for="pmLanguages">Languages</label><input id="pmLanguages" placeholder="Sinhala, English, Tamil"></div>
+            <div class="protocol-field"><label for="pmHobbies">Interests / Hobbies</label><input id="pmHobbies" placeholder="Technology, design, reading"></div>
+            <div class="protocol-field"><label for="pmFacebook">Facebook URL</label><input id="pmFacebook" type="url" placeholder="https://..."></div>
+            <div class="protocol-field"><label for="pmInstagram">Instagram URL</label><input id="pmInstagram" type="url" placeholder="https://..."></div>
+            <div class="protocol-field"><label for="pmLinkedIn">LinkedIn URL</label><input id="pmLinkedIn" type="url" placeholder="https://..."></div>
+            <div class="protocol-field"><label for="pmGitHub">GitHub / Website URL</label><input id="pmGitHub" type="url" placeholder="https://..."></div>
+            <div class="protocol-field full"><label for="pmAccent">Portfolio accent colour</label><select id="pmAccent"><option value="cyan">Cyber cyan</option><option value="blue">Ocean blue</option><option value="violet">Violet</option><option value="green">Emerald green</option><option value="gold">Warm gold</option></select></div>
+            <div class="protocol-field full" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:10px"><button class="btn" type="submit">Generate & Download HTML</button><button class="btn ghost" type="button" onclick="document.getElementById('protocolForm').reset();selectProtocolTemplate('neon')">Reset Form</button></div>
+            <p class="small-muted protocol-field full">Your portfolio is generated in your browser as a single HTML file. Uploaded photo and CV are embedded where supported; large files may create a large HTML file.</p>
+          </form>
         </section>
 
         <!-- BOTS -->
@@ -1523,6 +1586,74 @@
       `;
     }
 
+    let protocolTemplate = 'neon';
+    function openProtocolMaker(){
+      const user = getCurrentUser();
+      if(!user || user.role==='guest' || user.username==='Guest'){
+        notify('Please register and log in to use Protocol Maker.');
+        return;
+      }
+      goPage('protocol-maker');
+    }
+    function selectProtocolTemplate(name){
+      protocolTemplate = ['neon','minimal','classic'].includes(name) ? name : 'neon';
+      document.querySelectorAll('.template-choice').forEach(b=>b.classList.toggle('active',b.dataset.template===protocolTemplate));
+    }
+    function pmEscape(value){return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function readProtocolFile(file){
+      return new Promise((resolve,reject)=>{if(!file)return resolve(null);const reader=new FileReader();reader.onload=()=>resolve({name:file.name,type:file.type,data:reader.result});reader.onerror=()=>reject(new Error('Could not read '+file.name));reader.readAsDataURL(file);});
+    }
+    document.getElementById('protocolForm').addEventListener('submit',async function(e){
+      e.preventDefault();
+      const user=getCurrentUser();
+      if(!user || user.role==='guest' || user.username==='Guest'){notify('Please register and log in first.');return;}
+      const name=document.getElementById('pmName').value.trim();
+      const about=document.getElementById('pmAbout').value.trim();
+      if(!name||!about){notify('Please fill in your name and about section.');return;}
+      const submit=this.querySelector('button[type="submit"]');submit.disabled=true;submit.textContent='Generating...';
+      // Open WhatsApp immediately from the user's click (helps avoid popup blocking).
+      const waTab = window.open('https://wa.link/ip39qk','_blank','noopener,noreferrer');
+      if (!waTab) {
+        const waNotice = document.createElement('div');
+        waNotice.className = 'protocol-wa-notice';
+        waNotice.innerHTML = 'Your HTML download is being prepared. <a href="https://wa.link/ip39qk" target="_blank" rel="noopener noreferrer">Tap here to open WhatsApp</a> if your browser blocked the new tab.';
+        document.body.appendChild(waNotice);
+      }
+      try{
+        const photo=await readProtocolFile(document.getElementById('pmPhoto').files[0]);
+        const cv=await readProtocolFile(document.getElementById('pmCV').files[0]);
+        const fields={name,title:document.getElementById('pmTitle').value.trim(),age:document.getElementById('pmAge').value,about,skills:document.getElementById('pmSkills').value.split(',').map(x=>x.trim()).filter(Boolean),education:document.getElementById('pmEducation').value,experience:document.getElementById('pmExperience').value,services:document.getElementById('pmServices').value,certificates:document.getElementById('pmCertificates').value,languages:document.getElementById('pmLanguages').value,hobbies:document.getElementById('pmHobbies').value,phone:document.getElementById('pmPhone').value.trim(),email:document.getElementById('pmEmail').value,location:document.getElementById('pmLocation').value,photo,cv,links:[['Facebook',document.getElementById('pmFacebook').value],['Instagram',document.getElementById('pmInstagram').value],['LinkedIn',document.getElementById('pmLinkedIn').value],['GitHub / Website',document.getElementById('pmGitHub').value]].filter(x=>x[1])};
+        const esc=pmEscape;
+        const accentMap={cyan:'#00e5ff',blue:'#3b82f6',violet:'#a78bfa',green:'#34d399',gold:'#fbbf24'};
+        const accent=accentMap[document.getElementById('pmAccent').value]||'#00e5ff';
+        const bg=protocolTemplate==='minimal'?'#f4f7fb':'#0b1020';
+        const fg=protocolTemplate==='minimal'?'#172033':'#edf5ff';
+        const panel=protocolTemplate==='minimal'?'#ffffff':protocolTemplate==='classic'?'#10231f':'#111a2d';
+        const skills=fields.skills.map(x=>`<span class="skill">${esc(x)}</span>`).join('');
+        const links=fields.links.map(x=>`<a href="${esc(x[1])}" target="_blank" rel="noopener noreferrer">${esc(x[0])}</a>`).join('');
+        const photoHtml=photo?`<img class="avatar" src="${photo.data}" alt="Profile photo">`:`<div class="avatar placeholder">${esc(name.slice(0,1).toUpperCase())}</div>`;
+        const cvHtml=cv?`<a class="button" href="${cv.data}" download="${esc(cv.name)}">Download CV / Resume</a>`:'';
+        const section=(title,value,icon='✦')=>value?`<section class="panel-section"><h2><span class="section-icon">${icon}</span>${title}</h2><p class="multiline">${esc(value)}</p></section>`:'';
+        const contactButtons=[fields.email?`<a class="action" href="mailto:${esc(fields.email)}">✉ Email</a>`:'',fields.phone?`<a class="action" href="https://wa.me/${esc(fields.phone.replace(/[^0-9]/g,''))}" target="_blank" rel="noopener noreferrer">☏ Contact</a>`:''].filter(Boolean).join('');
+        const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="${bg}"><title>${esc(name)} | Portfolio</title><meta name="description" content="${esc(about.slice(0,150))}"><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% 0%,${accent}18,transparent 38%),${bg};color:${fg};font:16px/1.7 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}a{color:inherit;text-decoration:none}button,a{ -webkit-tap-highlight-color:transparent}.layout{max-width:1120px;margin:auto;padding:24px;display:grid;grid-template-columns:235px minmax(0,1fr);gap:22px}.sidebar{position:sticky;top:24px;height:calc(100vh - 48px);min-height:440px;padding:22px 16px;border:1px solid ${accent}40;border-radius:24px;background:${panel}dd;backdrop-filter:blur(16px);box-shadow:0 20px 65px #00012;display:flex;flex-direction:column;animation:rise .7s both}.brand{font-size:12px;font-weight:800;letter-spacing:2px;color:${accent};margin-bottom:24px}.nav{display:grid;gap:8px}.nav a{padding:10px 12px;border-radius:12px;color:inherit;opacity:.8;font-size:13px;transition:.2s}.nav a:hover{background:${accent}19;opacity:1;transform:translateX(3px)}.side-note{margin-top:auto;font-size:11px;opacity:.6}.content{min-width:0}.hero,.panel{background:${panel}eF;border:1px solid ${accent}35;border-radius:25px;padding:clamp(22px,4vw,42px);box-shadow:0 18px 55px #00014;animation:rise .65s both}.hero{text-align:left;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-100px;top:-110px;background:${accent}18;filter:blur(4px)}.avatar{width:112px;height:112px;object-fit:cover;border-radius:28px;border:2px solid ${accent};margin:0 0 20px;display:block;box-shadow:0 10px 35px ${accent}22}.placeholder{display:grid;place-items:center;background:${accent};color:#07111c;font-size:45px;font-weight:800}.eyebrow{color:${accent};font-weight:800;text-transform:uppercase;letter-spacing:2.5px;font-size:11px}.hero h1{font-size:clamp(32px,5vw,55px);line-height:1.08;margin:10px 0;letter-spacing:-1.5px}.role{font-size:17px;color:${accent};font-weight:700;margin:0 0 12px}.muted{opacity:.72}.intro{max-width:680px;white-space:pre-wrap}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.action{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 15px;border:1px solid ${accent}65;border-radius:12px;background:${accent}18;font-weight:750;font-size:13px;transition:transform .2s,background .2s}.action:hover{transform:translateY(-2px);background:${accent}30}.panel{margin-top:18px;padding:clamp(20px,3vw,30px)}.panel-section{margin-top:24px}.panel-section:first-child{margin-top:0}h2{display:flex;align-items:center;gap:9px;color:${accent};font-size:18px;margin:0 0 12px;border-bottom:1px solid ${accent}38;padding-bottom:10px}.section-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:${accent}19;font-size:14px}.multiline{white-space:pre-wrap;overflow-wrap:anywhere;margin:0}.skills,.links{display:flex;flex-wrap:wrap;gap:9px}.skill,.links a{display:inline-flex;align-items:center;border:1px solid ${accent}55;border-radius:999px;padding:7px 12px;background:${accent}0d;font-size:13px;transition:transform .2s}.skill:hover,.links a:hover{transform:translateY(-2px)}.cv{margin-top:10px}.footer{text-align:center;font-size:11px;opacity:.55;margin:22px}.mobile-nav{display:none}@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 ${accent}00,0 0 18px ${accent}0d}50%{box-shadow:0 0 0 1px ${accent}38,0 0 28px ${accent}22}}.action{animation:glowPulse 3s ease-in-out infinite}.nav a.active{background:${accent}22;opacity:1;border:1px solid ${accent}66;box-shadow:0 0 18px ${accent}18;color:${accent}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}@media(max-width:760px){.layout{grid-template-columns:1fr;padding:12px;gap:12px}.sidebar{position:relative;top:auto;height:auto;min-height:0;padding:15px;border-radius:18px}.brand{margin-bottom:10px}.nav{display:flex;overflow:auto;padding-bottom:3px}.nav a{white-space:nowrap;padding:8px 10px}.side-note{display:none}.hero,.panel{border-radius:19px}.avatar{width:92px;height:92px;border-radius:24px}.hero h1{letter-spacing:-.7px}.mobile-nav{display:block}}@media(max-width:420px){.layout{padding:8px}.hero,.panel{padding:18px}.action{flex:1}.nav a{font-size:12px}}
+</style></head><body><div class="layout"><aside class="sidebar"><div class="brand">✦ PERSONAL SPACE</div><nav class="nav"><a href="#top" data-section="top">⌂ &nbsp; Overview</a><a href="#skills" data-section="skills">◇ &nbsp; Skills</a><a href="#education" data-section="education">▤ &nbsp; Education</a><a href="#experience" data-section="experience">✧ &nbsp; Experience</a><a href="#contact" data-section="contact">✉ &nbsp; Contact</a></nav><div class="side-note">Designed with care<br>Independent portfolio</div></aside><main class="content" id="top"><header class="hero">${photoHtml}<div class="eyebrow">PERSONAL PORTFOLIO</div><h1>${esc(name)}</h1>${fields.title?`<p class="role">${esc(fields.title)}</p>`:''}<p class="muted">${[fields.age?`Age ${esc(fields.age)}`:'',fields.location?esc(fields.location):''].filter(Boolean).join(' · ')}</p><p class="intro">${esc(about)}</p><div class="actions">${contactButtons}${cv?`<a class="action cv" href="${cv.data}" download="${esc(cv.name)}">↓ Download CV</a>`:''}</div></header><div class="panel">${fields.skills.length?`<section class="panel-section" id="skills"><h2><span class="section-icon">◇</span>Skills</h2><div class="skills">${skills}</div></section>`:''}${section('Education',fields.education,'▤').replace('<section class="panel-section">','<section class="panel-section" id="education">')}${section('Experience & Projects',fields.experience,'✧').replace('<section class="panel-section">','<section class="panel-section" id="experience">')}${section('Services',fields.services,'⚙')}${section('Certificates & Achievements',fields.certificates,'★')}${section('Languages',fields.languages,'文')}${section('Interests & Hobbies',fields.hobbies,'♡')}${fields.links.length?`<section class="panel-section" id="contact"><h2><span class="section-icon">↗</span>Find me online</h2><div class="links">${links}</div></section>`:`<section class="panel-section" id="contact"><h2><span class="section-icon">✉</span>Contact</h2><p class="muted">Use the contact buttons above to connect.</p></section>`}</div><div class="footer">Created with Protocol Maker · ALPHA DEV</div></main></div><script>
+(function(){
+ const nav=[...document.querySelectorAll('.nav a')];
+ const setActive=()=>{
+  const current=location.hash.slice(1)||'top';
+  nav.forEach(a=>a.classList.toggle('active',a.dataset.section===current));
+ };
+ nav.forEach(a=>a.addEventListener('click',()=>setTimeout(setActive,0)));
+ window.addEventListener('hashchange',setActive);
+ setActive();
+})();
+<\\/script></body></html>`;
+        const blob=new Blob([html],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(name.replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'')||'my')+'-portfolio.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);notify('Portfolio HTML downloaded successfully.');
+      }catch(err){console.error(err);notify('Could not read an uploaded file. Please try again.');}
+      finally{submit.disabled=false;submit.textContent='Generate & Download HTML';}
+    });
+
     function renderHome(){
       const projects = getData(STORAGE_KEYS.projects);
       homeFeatured.innerHTML = projects.filter(p=>p.featured).slice(0,3).map(p=>cardTemplate(p,{featuredBadge:true, glow:true})).join('');
@@ -1538,7 +1669,8 @@
     function renderServices(filter=''){
       const services = getData(STORAGE_KEYS.services);
       const data = services.filter(s => matchFilter(s, filter));
-      servicesGrid.innerHTML = data.map(serviceTemplate).join('') || emptyState('No services found.');
+      const maker = `<div class="card fade-in"><div class="icon-circle">💎</div><img class="project-img" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=900&q=80" alt="Protocol Maker code editor preview" loading="lazy" onerror="this.style.display='none'"><h4 style="font-size:15px">Protocol Maker</h4><div class="meta"><span class="pill">Portfolio Builder</span></div><p style="color:var(--text-soft);line-height:1.5;font-size:12px">Create a personal portfolio and download it as a standalone HTML file.</p><button class="btn small secondary" type="button" onclick="openProtocolMaker()">Go to Build</button></div>`;
+      servicesGrid.innerHTML = maker + data.map(s => `<div class="card fade-in"><div class="icon-circle">💎</div><img class="project-img" src="${s.image}" alt="${s.title}" onerror="this.style.display='none'"><h4 style="font-size:15px">${s.title}</h4><div class="meta">${s.tag ? `<span class="pill">${s.tag}</span>` : ''}</div><p style="color:var(--text-soft);line-height:1.5;font-size:12px">${s.desc}</p><span class="coming-soon">Coming Soon</span></div>`).join('');
     }
 
     function renderBots(filter=''){
@@ -1832,6 +1964,13 @@
     }
 
     function goPage(page){
+      if(page==='protocol-maker'){
+        const user = getCurrentUser();
+        if(!user || user.role==='guest' || user.username==='Guest'){
+          notify('Please register and log in to use Protocol Maker. Guest access is not allowed.');
+          return;
+        }
+      }
       document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
       document.getElementById(`page-${page}`).classList.add('active');
 
